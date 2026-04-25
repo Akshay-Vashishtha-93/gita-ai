@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-saffron: #E07B18;
+  --color-saffron-dark: #B85E08;
+  --color-saffron-light: #F4A55A;
+  --color-maroon: #5E1520;
+  --color-maroon-light: #7A2030;
+  --color-gold: #B8963C;
+  --color-gold-light: #D4B870;
+  --color-gold-pale: #F0E4C4;
+  --color-cream: #FDF8F0;
+  --color-warm-gray: #EDE6D8;
+  --color-text-primary: #1A0F08;
+  --color-text-secondary: #7A6350;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html, body {
+  background: var(--color-cream);
+  color: var(--color-text-primary);
+}
+
+/* ─── Sacred background ─── */
+.bg-sacred {
+  background-color: var(--color-cream);
+  background-image:
+    radial-gradient(ellipse at 15% 10%, rgba(224,123,24,0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 85% 85%, rgba(94,21,32,0.07) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 50%, rgba(184,150,60,0.04) 0%, transparent 70%);
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-gold-light); border-radius: 4px; }
+
+/* ─── Gold divider ─── */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--color-gold-light), transparent);
+}
+
+/* ─── Cards ─── */
+.card-premium {
+  background: white;
+  border: 1px solid rgba(184,150,60,0.18);
+  box-shadow: 0 1px 2px rgba(94,21,32,0.04), 0 4px 12px rgba(94,21,32,0.06);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.card-premium:hover {
+  box-shadow: 0 2px 8px rgba(94,21,32,0.08), 0 8px 24px rgba(94,21,32,0.1);
+}
+.hover-lift:hover { transform: translateY(-2px); }
+
+/* ─── Sanskrit typography ─── */
+.sanskrit {
+  font-family: 'Noto Serif', Georgia, 'Times New Roman', serif;
+  line-height: 1.9;
+  letter-spacing: 0.01em;
+}
+
+/* ─── Progress bar ─── */
+.progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--color-warm-gray);
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--color-saffron), var(--color-gold));
+  transition: width 0.5s ease;
+}
+
+/* ─── Read badge ─── */
+.badge-read {
+  background: rgba(34,197,94,0.1);
+  color: #15803d;
+  border: 1px solid rgba(34,197,94,0.25);
+}
+.badge-unread {
+  background: rgba(184,150,60,0.08);
+  color: var(--color-text-secondary);
+  border: 1px solid rgba(184,150,60,0.2);
+}
+
+/* ─── Markdown prose in chat ─── */
+.prose p { margin-bottom: 0.85rem; line-height: 1.8; }
+.prose p:last-child { margin-bottom: 0; }
+.prose h3 { font-size: 1rem; font-weight: 700; margin-top: 1.25rem; margin-bottom: 0.4rem; color: var(--color-maroon); }
+.prose ul { margin-bottom: 0.75rem; padding-left: 1.25rem; list-style: disc; }
+.prose li { margin-bottom: 0.25rem; }
+.prose strong { font-weight: 600; color: var(--color-maroon); }
+.prose em { font-style: italic; color: var(--color-text-secondary); }
+.prose hr { border-color: var(--color-gold-light); margin: 1.25rem 0; opacity: 0.4; }
+
+/* ─── Shimmer loading skeleton ─── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, var(--color-warm-gray) 25%, #e8e0d0 50%, var(--color-warm-gray) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}

@@ -17,6 +17,9 @@ node_modules/
 # Database (auto-created on deploy)
 *.db
 
+# Pre-computed embeddings (no longer needed — using TF-IDF at runtime)
+*.npz
+
 # OS
 .DS_Store
 Thumbs.db

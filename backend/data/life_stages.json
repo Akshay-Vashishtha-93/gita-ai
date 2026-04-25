@@ -1,0 +1,72 @@
+[
+  {
+    "id": "STUDENT", "name": "Student", "age_lower": 16, "age_upper": 22, "ashrama": "BRAHMACHARYA",
+    "description": "In school or college, discovering identity, facing academic pressure",
+    "primary_concerns": ["Exams", "Career choice", "Peer comparison", "First relationships", "Identity"],
+    "india_pressures": ["JEE/NEET/Board exam culture", "Kota coaching", "Parental career expectations", "Log kya kahenge about results"],
+    "tone": "Casual Hinglish, relatable, zero preaching. Like talking to a younger sibling.",
+    "avoid": ["Don't lecture", "Don't moralize", "Don't dismiss exam stress as trivial", "Don't use heavy Sanskrit"],
+    "resonant_concepts": ["NISHKAMA_KARMA", "MANAS_MITRA_SHATRU", "SELF_DOUBT", "SVADHARMA"],
+    "resonant_chapters": [2, 3, 6]
+  },
+  {
+    "id": "YOUNG_PROFESSIONAL", "name": "Young Professional", "age_lower": 22, "age_upper": 30, "ashrama": "LATE_BRAHMACHARYA",
+    "description": "Establishing career, gaining independence, navigating adult relationships",
+    "primary_concerns": ["Career establishment", "Financial independence", "Marriage pressure", "Quarter-life crisis"],
+    "india_pressures": ["Settled ho gaye? nagging", "LinkedIn batch-mate comparison", "Startup vs stability", "Parents retirement planning"],
+    "tone": "Professional but warm, ambitious language, practical frameworks.",
+    "avoid": ["Don't assume marriage is their goal", "Don't patronize", "Don't be preachy"],
+    "resonant_concepts": ["SVADHARMA", "NISHKAMA_KARMA", "BUDDHI_YOGA", "KARMA_YOGA"],
+    "resonant_chapters": [2, 3, 4, 5]
+  },
+  {
+    "id": "SETTLING_DOWN", "name": "Settling Down", "age_lower": 28, "age_upper": 35, "ashrama": "GRIHASTHA",
+    "description": "Marriage, first child, balancing family and career",
+    "primary_concerns": ["Marriage dynamics", "In-law conflicts", "First child", "Work-life balance", "EMIs"],
+    "india_pressures": ["Joint family friction", "Dual-income guilt", "When baby? pressure", "Spouse comparison"],
+    "tone": "Empathetic, practical, validates complexity of grihastha life.",
+    "avoid": ["Don't judge family choices", "Don't assume traditional setup"],
+    "resonant_concepts": ["YAJNA_SPIRIT", "LOKASAMGRAHA", "SAMATVA", "DHARMA"],
+    "resonant_chapters": [3, 12, 13]
+  },
+  {
+    "id": "MID_CAREER", "name": "Mid-Career / Parenting", "age_lower": 35, "age_upper": 45, "ashrama": "GRIHASTHA",
+    "description": "Career peak/plateau, raising children, aging parents, maximum responsibility",
+    "primary_concerns": ["Career plateau", "Children's education", "Aging parents", "Financial peak stress"],
+    "india_pressures": ["Best school rat race", "Tuition anxiety", "Sandwich generation", "Mid-career pivot fear"],
+    "tone": "Peer-to-peer, respects their experience, acknowledges they've figured out a lot.",
+    "avoid": ["Don't oversimplify their complex situation", "Don't be condescending"],
+    "resonant_concepts": ["KARMA_PHALA_TYAGA", "STHITAPRAJNA", "DHARMA_SANKATA", "SAMATVA"],
+    "resonant_chapters": [2, 3, 14, 18]
+  },
+  {
+    "id": "MIDLIFE_TRANSITION", "name": "Midlife Transition", "age_lower": 45, "age_upper": 55, "ashrama": "LATE_GRIHASTHA",
+    "description": "Questioning everything, empty nest approaching, health scares, legacy thinking",
+    "primary_concerns": ["Existential questioning", "Empty nest", "Health scares", "Legacy thinking"],
+    "india_pressures": ["Children leaving for US/abroad", "What did I achieve?", "Body decline", "Retirement planning"],
+    "tone": "Philosophical depth welcome, Shankaracharya/Aurobindo resonate.",
+    "avoid": ["Don't suggest it's too late", "Don't trivialize midlife questioning"],
+    "resonant_concepts": ["JNANA_YOGA", "GUNATITA", "VIBHUTI", "VAIRAGYA"],
+    "resonant_chapters": [7, 9, 10, 13, 15]
+  },
+  {
+    "id": "PRE_RETIREMENT", "name": "Pre-Retirement", "age_lower": 55, "age_upper": 65, "ashrama": "VANAPRASTHA",
+    "description": "Transitioning from active career, redefining identity",
+    "primary_concerns": ["Retirement identity void", "Health management", "Letting go of control", "Grandparenting"],
+    "india_pressures": ["Who am I without my title?", "Relevance anxiety", "Children not listening anymore"],
+    "tone": "Respectful (aap/ji), Hindi preferred, gentle but honest.",
+    "avoid": ["Don't suggest they're old", "Don't be dismissive of their concerns"],
+    "resonant_concepts": ["VAIRAGYA", "SANNYASA", "ANTIMA_SMARANA", "JNANA"],
+    "resonant_chapters": [4, 6, 8, 15]
+  },
+  {
+    "id": "ELDER", "name": "Elder / Wisdom Stage", "age_lower": 65, "age_upper": 100, "ashrama": "SANNYASA",
+    "description": "Mortality awareness, spiritual deepening, legacy, physical dependence",
+    "primary_concerns": ["Mortality", "Legacy", "Spiritual deepening", "Physical dependence", "Loneliness"],
+    "india_pressures": ["Fear of being a burden", "Old-age-home stigma", "Loss of spouse", "Grandchildren abroad"],
+    "tone": "Deep reverence, slow pace, philosophical richness. Hindi/regional language.",
+    "avoid": ["Don't rush them", "Don't be overly cheerful", "Don't diminish their concerns"],
+    "resonant_concepts": ["MOKSHA", "SHARANAGATI", "DEHI_NITYA", "STHITAPRAJNA", "ATMA_JNANA"],
+    "resonant_chapters": [2, 8, 12, 15, 18]
+  }
+]

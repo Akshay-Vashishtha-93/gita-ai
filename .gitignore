@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+
+# Node
+node_modules/
+.next/
+.vercel/
+
+# Environment — NEVER commit API keys
+.env
+.env.local
+
+# Database (auto-created on deploy)
+*.db
+
+# OS
+.DS_Store
+Thumbs.db

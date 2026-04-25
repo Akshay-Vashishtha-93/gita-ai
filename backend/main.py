@@ -11,7 +11,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 from db.database import init_db, get_db
-from services.embedding import generate_embeddings, search_verses, get_verse_by_id, get_verses_by_chapter
+from services.embedding import search_verses, get_verse_by_id, get_verses_by_chapter
 from services.knowledge_graph import get_problems, get_emotions, get_life_stages, get_life_stage_for_age
 from agents.pipeline import process_query, client as llm_client
 from config import LLM_MODEL, MAX_TOKENS
@@ -20,13 +20,10 @@ from agents.safety import assess_risk
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """Startup: init DB and load embeddings."""
-    print("🕉️  GitaAI starting up...")
+    """Startup: init DB. TF-IDF index is built lazily on first search."""
+    print("GitaAI starting up...")
     await init_db()
-    print("✅ Database initialized")
-    generate_embeddings()
-    print("✅ Embeddings loaded")
-    print("🙏 GitaAI ready to serve wisdom")
+    print("Database initialized. Ready.")
     yield
     print("GitaAI shutting down...")
 

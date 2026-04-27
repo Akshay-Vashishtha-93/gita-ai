@@ -37,6 +37,68 @@ interface MessageBubbleProps {
   riskLevel?: string;
 }
 
+function KurukshetraScene() {
+  return (
+    <div className="w-full h-16 overflow-hidden flex-shrink-0">
+      <svg viewBox="0 0 400 64" preserveAspectRatio="xMidYMid slice" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        {/* Pre-dawn sky */}
+        <rect width="400" height="64" fill="#0f0400"/>
+        {/* Horizon glow */}
+        <ellipse cx="200" cy="64" rx="180" ry="42" fill="#92400e" opacity="0.4"/>
+        <ellipse cx="200" cy="64" rx="100" ry="26" fill="#b45309" opacity="0.3"/>
+        <ellipse cx="200" cy="64" rx="55" ry="16" fill="#f59e0b" opacity="0.2"/>
+        {/* Stars */}
+        <circle cx="32" cy="10" r="1" fill="#fde68a" opacity="0.5"/>
+        <circle cx="68" cy="6" r="1.3" fill="#fde68a" opacity="0.4"/>
+        <circle cx="110" cy="14" r="0.9" fill="#fde68a" opacity="0.35"/>
+        <circle cx="155" cy="8" r="1.1" fill="#fde68a" opacity="0.4"/>
+        <circle cx="245" cy="11" r="1" fill="#fde68a" opacity="0.45"/>
+        <circle cx="290" cy="5" r="1.3" fill="#fde68a" opacity="0.4"/>
+        <circle cx="340" cy="16" r="0.9" fill="#fde68a" opacity="0.3"/>
+        <circle cx="375" cy="9" r="1" fill="#fde68a" opacity="0.5"/>
+        {/* Ground */}
+        <rect x="0" y="52" width="400" height="12" fill="#0a0200"/>
+        {/* Left horse */}
+        <ellipse cx="122" cy="48" rx="20" ry="7" fill="#0a0200" opacity="0.95"/>
+        <rect x="112" y="38" width="7" height="14" rx="3.5" fill="#0a0200"/>
+        <rect x="120" y="36" width="5" height="6" rx="2.5" fill="#0a0200"/>
+        {/* Right horse */}
+        <ellipse cx="278" cy="48" rx="20" ry="7" fill="#0a0200" opacity="0.95"/>
+        <rect x="278" y="38" width="7" height="14" rx="3.5" fill="#0a0200"/>
+        <rect x="272" y="36" width="5" height="6" rx="2.5" fill="#0a0200"/>
+        {/* Chariot body */}
+        <rect x="155" y="32" width="90" height="22" rx="3" fill="#0a0200"/>
+        <line x1="160" y1="37" x2="240" y2="37" stroke="#92400e" strokeWidth="1.5" opacity="0.7"/>
+        {/* Left wheel */}
+        <circle cx="170" cy="54" r="10" fill="none" stroke="#92400e" strokeWidth="1.8" opacity="0.75"/>
+        <circle cx="170" cy="54" r="3.5" fill="#92400e" opacity="0.55"/>
+        <line x1="170" y1="44" x2="170" y2="64" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        <line x1="160" y1="54" x2="180" y2="54" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        {/* Right wheel */}
+        <circle cx="230" cy="54" r="10" fill="none" stroke="#92400e" strokeWidth="1.8" opacity="0.75"/>
+        <circle cx="230" cy="54" r="3.5" fill="#92400e" opacity="0.55"/>
+        <line x1="230" y1="44" x2="230" y2="64" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        <line x1="220" y1="54" x2="240" y2="54" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        {/* Flag pole + Hanuman flag */}
+        <line x1="197" y1="32" x2="197" y2="10" stroke="#92400e" strokeWidth="1.5" opacity="0.9"/>
+        <path d="M197,10 L215,17 L197,24Z" fill="#dc2626" opacity="0.75"/>
+        {/* Two figure silhouettes on chariot */}
+        <circle cx="183" cy="32" r="5.5" fill="#060100"/>
+        <rect x="179" y="32" width="9" height="8" rx="1" fill="#060100"/>
+        <circle cx="206" cy="30" r="5.5" fill="#060100"/>
+        <rect x="202" y="30" width="9" height="8" rx="1" fill="#060100"/>
+        {/* Bow arc suggestion */}
+        <path d="M214,25 Q222,30 214,40" fill="none" stroke="#92400e" strokeWidth="1.2" opacity="0.55"/>
+        {/* Yoke / reins */}
+        <line x1="155" y1="43" x2="140" y2="47" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        <line x1="155" y1="43" x2="137" y2="46" stroke="#92400e" strokeWidth="1" opacity="0.3"/>
+        <line x1="245" y1="43" x2="262" y2="47" stroke="#92400e" strokeWidth="1" opacity="0.4"/>
+        <line x1="245" y1="43" x2="264" y2="46" stroke="#92400e" strokeWidth="1" opacity="0.3"/>
+      </svg>
+    </div>
+  );
+}
+
 function VerseCard({ verse }: { verse: Verse }) {
   const [showHindi, setShowHindi] = useState(false);
   return (
@@ -47,6 +109,12 @@ function VerseCard({ verse }: { verse: Verse }) {
         style={{ backgroundImage: "radial-gradient(circle at 50% 50%, #d4a84b 1px, transparent 1px)", backgroundSize: "24px 24px" }} />
       {/* Faint Om watermark */}
       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-8xl text-white/5 select-none pointer-events-none font-serif">ॐ</div>
+
+      {/* Kurukshetra scene illustration */}
+      <div className="relative">
+        <KurukshetraScene />
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-stone-900/80 pointer-events-none" />
+      </div>
 
       <div className="relative px-5 py-4">
         {/* Badge */}

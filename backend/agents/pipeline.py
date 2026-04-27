@@ -41,15 +41,27 @@ CLASSIFIER_SYSTEM = """Classify the user's message. Return ONLY valid JSON, no m
   "is_brief": true|false
 }
 
-- greeting: hi, hello, namaste, thanks, ok, good morning
+query_type rules:
+- greeting: hi, hello, namaste, thanks, ok, good morning, how are you
 - casual: small talk, not a life problem
-- verse_followup: asking about a verse, chapter, shloka, or following up on Gita content
+- verse_followup: asking about a specific verse, chapter, shloka, or following up on Gita content
 - life_problem: personal struggle, dilemma, emotional pain — needs full guidance
-- philosophical: asking about karma, dharma, moksha, abstract concepts
+- philosophical: asking about karma, dharma, moksha, abstract Gita concepts
 
-- needs_verse: true for life_problem + philosophical only
-- is_brief: true for greeting, casual, verse_followup
-- language: detect from the message itself. hinglish = Hindi + English mix"""
+language rules (CRITICAL — detect very carefully):
+- "hinglish": ANY message that mixes Hindi and English words, OR uses Hindi words written in Roman script (e.g. "mera", "kya", "yaar", "nahi", "kuch", "ho", "gaya", "hai", "main", "tum", "apna", "zyada", "bahut", "lagta", "chahiye", "samajh", "rishta", "karna")
+- "hi": message written primarily in Devanagari script (हिंदी)
+- "en": message written entirely in English with no Hindi words
+
+Examples:
+- "I am feeling bahut akela" → hinglish
+- "mera career chhod dena chahiye kya" → hinglish
+- "yaar kya karu main" → hinglish
+- "I don't know what to do" → en
+- "मुझे नहीं पता" → hi
+
+needs_verse: true only for life_problem + philosophical
+is_brief: true for greeting, casual, verse_followup"""
 
 
 def classify(query: str, history: list[dict]) -> dict:
@@ -181,10 +193,12 @@ For verse_followup:
   "response": "Concise, thoughtful answer to their specific question about the verse/chapter. 3-6 sentences."
 }
 
-LANGUAGE RULES (CRITICAL - follow exactly):
-- If language=hinglish: Mix Hindi naturally. "Yaar, ye situation mein...", "Sach batao", "Tumhara jo dil keh raha hai..."
-- If language=hi: Respond primarily in Hindi with technical terms in English
-- If language=en: Respond in English
+LANGUAGE RULES (MANDATORY — this overrides everything else):
+- The RESPOND IN LANGUAGE field tells you EXACTLY what language to use. You MUST use it.
+- language=hinglish: Write your ENTIRE response mixing Hindi and English naturally, the way urban Indians actually talk. Use Hindi for emotions/feelings and English for concepts. Examples of Hinglish tone: "Yaar, sach batao...", "Dekho, tumhara jo dard hai...", "Ye situation mein sab aisa hi feel karte hain", "Ek kaam karo aaj", "Tumhare andar jo dar hai..."  — NEVER write a full-English response if language=hinglish.
+- language=hi: Respond primarily in Hindi (Devanagari encouraged, Roman Hindi acceptable). Use English only for technical terms.
+- language=en: Respond fully in English.
+- If you are unsure, default to the detected language. NEVER ignore this field.
 
 QUALITY RULES:
 - empathy must reference something specific from their message (not "I understand you're going through a tough time")

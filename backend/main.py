@@ -51,7 +51,10 @@ app.add_middleware(
 
 # ─── Models ───
 
+MESSAGE_LIMIT = 5  # max user messages per account (across all sessions)
+
 class UserCreate(BaseModel):
+    email: Optional[str] = None
     display_name: Optional[str] = None
     age: int = Field(ge=10, le=100)
     gender: Optional[str] = None
@@ -89,11 +92,20 @@ async def create_user(user: UserCreate):
     life_stage = get_life_stage_for_age(user.age)
 
     db = await get_db()
+
+    # If email provided, check if user already exists
+    if user.email:
+        cursor = await db.execute("SELECT id FROM users WHERE email = ?", (user.email,))
+        existing = await cursor.fetchone()
+        if existing:
+            await db.close()
+            raise HTTPException(status_code=409, detail="email_exists")
+
     await db.execute(
-        """INSERT INTO users (id, display_name, age, gender, location, preferred_language,
+        """INSERT INTO users (id, email, display_name, age, gender, location, preferred_language,
            life_stage_id, gita_familiarity, onboarding_complete)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)""",
-        (user_id, user.display_name, user.age, user.gender, user.location,
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)""",
+        (user_id, user.email, user.display_name, user.age, user.gender, user.location,
          user.preferred_language, life_stage["id"] if life_stage else None,
          user.gita_familiarity),
     )
@@ -105,6 +117,20 @@ async def create_user(user: UserCreate):
         "life_stage": life_stage,
         "message": "Welcome to GitaAI 🙏",
     }
+
+
+@app.post("/api/login")
+async def login(data: dict):
+    email = data.get("email", "").strip().lower()
+    if not email:
+        raise HTTPException(status_code=400, detail="Email required")
+    db = await get_db()
+    cursor = await db.execute("SELECT * FROM users WHERE LOWER(email) = ?", (email,))
+    user = await cursor.fetchone()
+    await db.close()
+    if not user:
+        raise HTTPException(status_code=404, detail="not_found")
+    return {"user_id": user["id"], "display_name": user["display_name"], "age": user["age"]}
 
 
 @app.get("/api/users/{user_id}")
@@ -131,6 +157,22 @@ async def chat(msg: ChatMessage):
         raise HTTPException(status_code=404, detail="User not found. Please complete onboarding first.")
     user_profile = dict(user_row)
 
+    # Enforce message limit (count user messages across all sessions)
+    cursor = await db.execute(
+        """SELECT COUNT(*) as cnt FROM messages m
+           JOIN sessions s ON m.session_id = s.id
+           WHERE s.user_id = ? AND m.role = 'user'""",
+        (msg.user_id,),
+    )
+    count_row = await cursor.fetchone()
+    msg_count = count_row["cnt"] if count_row else 0
+    if msg_count >= MESSAGE_LIMIT:
+        await db.close()
+        raise HTTPException(
+            status_code=429,
+            detail=f"You've used all {MESSAGE_LIMIT} questions in your free journey. More questions coming soon!"
+        )
+
     # Create or reuse session
     session_id = msg.session_id or str(uuid.uuid4())
     if not msg.session_id:
@@ -139,6 +181,14 @@ async def chat(msg: ChatMessage):
             (session_id, msg.user_id),
         )
 
+    # Load recent conversation history for context
+    history_cursor = await db.execute(
+        "SELECT role, content FROM messages WHERE session_id = ? ORDER BY created_at ASC",
+        (session_id,),
+    )
+    history_rows = await history_cursor.fetchall()
+    history = [{"role": r["role"], "content": r["content"]} for r in history_rows]
+
     # Save user message
     user_msg_id = str(uuid.uuid4())
     await db.execute(
@@ -146,8 +196,8 @@ async def chat(msg: ChatMessage):
         (user_msg_id, session_id, msg.message),
     )
 
-    # Process through agent pipeline
-    result = process_query(msg.message, user_profile)
+    # Process through agent pipeline (with history for context)
+    result = process_query(msg.message, user_profile, history)
 
     # Save assistant response
     assistant_msg_id = str(uuid.uuid4())
@@ -174,6 +224,8 @@ async def chat(msg: ChatMessage):
         "message_id": assistant_msg_id,
         "verse_ids": result.get("verse_ids", []),
         "risk_level": result["risk_level"],
+        "messages_used": msg_count + 1,
+        "messages_remaining": max(0, MESSAGE_LIMIT - msg_count - 1),
     }
 
 

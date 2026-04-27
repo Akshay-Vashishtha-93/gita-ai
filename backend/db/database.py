@@ -8,6 +8,7 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
     id TEXT PRIMARY KEY,
+    email TEXT UNIQUE,
     display_name TEXT,
     age INTEGER,
     gender TEXT,

@@ -29,6 +29,8 @@ export interface ChatResponse {
   message_id: string;
   verse_ids: string[];
   risk_level: string;
+  messages_used: number;
+  messages_remaining: number;
 }
 
 export interface LifeStage {
@@ -40,6 +42,7 @@ export interface LifeStage {
 }
 
 export async function createUser(data: {
+  email?: string;
   display_name?: string;
   age: number;
   gender?: string;
@@ -50,6 +53,13 @@ export async function createUser(data: {
   return request("/api/users", {
     method: "POST",
     body: JSON.stringify(data),
+  });
+}
+
+export async function loginUser(email: string): Promise<{ user_id: string; display_name: string | null; age: number }> {
+  return request("/api/login", {
+    method: "POST",
+    body: JSON.stringify({ email }),
   });
 }
 

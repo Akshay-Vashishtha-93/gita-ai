@@ -40,6 +40,7 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const [showSafety, setShowSafety] = useState(false);
+  const [messagesRemaining, setMessagesRemaining] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -120,6 +121,10 @@ export default function ChatPage() {
         localStorage.setItem("gitaai_session_id", result.session_id);
       }
 
+      if (typeof result.messages_remaining === "number") {
+        setMessagesRemaining(result.messages_remaining);
+      }
+
       if (["high", "immediate", "moderate"].includes(result.risk_level)) {
         setShowSafety(true);
       }
@@ -135,15 +140,16 @@ export default function ChatPage() {
         },
       ]);
     } catch (err) {
+      const errMsg = err instanceof Error ? err.message : "Something went wrong.";
+      const isLimit = errMsg.includes("free journey") || errMsg.includes("429");
       setMessages((prev) => [
         ...prev,
         {
           id: `error-${Date.now()}`,
           role: "assistant",
-          content:
-            err instanceof Error
-              ? `I'm having trouble connecting. ${err.message}`
-              : "Something went wrong. Please try again.",
+          content: isLimit
+            ? "You've reached the limit of 5 questions for your free journey. We're working on bringing more. Thank you for walking this path with us. 🙏"
+            : `I'm having trouble connecting. ${errMsg}`,
         },
       ]);
     } finally {
@@ -276,9 +282,16 @@ export default function ChatPage() {
             <Send className="w-5 h-5" />
           </button>
         </div>
-        <p className="text-center text-xs text-text-secondary/60 mt-2 max-w-2xl mx-auto">
-          GitaAI provides spiritual guidance, not professional advice.
-        </p>
+        <div className="flex items-center justify-between mt-2 max-w-2xl mx-auto">
+          <p className="text-xs text-text-secondary/60">
+            GitaAI provides spiritual guidance, not professional advice.
+          </p>
+          {messagesRemaining !== null && (
+            <p className={`text-xs font-medium ${messagesRemaining <= 1 ? "text-red-400" : "text-text-secondary/60"}`}>
+              {messagesRemaining} question{messagesRemaining !== 1 ? "s" : ""} left
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );

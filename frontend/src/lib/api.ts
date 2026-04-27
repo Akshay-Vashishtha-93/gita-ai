@@ -25,6 +25,7 @@ export interface UserProfile {
 
 export interface ChatResponse {
   response: string;
+  structured?: Record<string, unknown>;
   session_id: string;
   message_id: string;
   verse_ids: string[];

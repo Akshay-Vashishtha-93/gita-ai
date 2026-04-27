@@ -74,12 +74,61 @@ def generate_embeddings(force: bool = False):
     _build_index()
 
 
+# Semantic expansion: map common emotional/life concepts to spiritual vocabulary present in verse texts
+_CONCEPT_EXPANSION = {
+    "purpose": "karma action duty meaning life dharma",
+    "purposeless": "karma action duty meaning dharma",
+    "meaning": "karma dharma duty purpose soul",
+    "anger": "wrath emotion equanimity detachment calm peace",
+    "angry": "wrath emotion equanimity detachment",
+    "family": "duty relationship attachment obligation love",
+    "fear": "courage fearless worry trust surrender divine",
+    "afraid": "courage fearless trust surrender",
+    "failure": "success result outcome detachment action fruit",
+    "fail": "result outcome action detachment",
+    "lonely": "peace within self isolation connection soul",
+    "alone": "self peace within soul",
+    "career": "work duty profession action result",
+    "job": "work duty action result karma",
+    "stress": "peace mind calm equanimity anxiety",
+    "anxious": "peace mind calm equanimity worry",
+    "confused": "wisdom clarity knowledge direction discernment",
+    "lost": "wisdom direction dharma guidance",
+    "comparison": "envy self ego attachment others jealousy",
+    "jealous": "envy attachment self ego others",
+    "grief": "loss death soul immortal eternal mourn",
+    "death": "soul immortal eternal liberation body",
+    "love": "attachment devotion relationship desire",
+    "marriage": "duty relationship attachment householder",
+    "parents": "duty obligation respect relationship",
+    "guilt": "action result past regret forgiveness",
+    "shame": "ego self image attachment",
+    "depression": "mind peace self soul despondency",
+    "hopeless": "surrender trust divine action faith",
+    "burnout": "work rest action detachment result",
+    "money": "desire attachment wealth material",
+    "success": "result attachment action karma outcome",
+}
+
+
+def _expand_query(query: str) -> str:
+    """Append spiritually-relevant expansion terms for common emotional keywords."""
+    lower = query.lower()
+    expansions = []
+    for keyword, expansion in _CONCEPT_EXPANSION.items():
+        if keyword in lower:
+            expansions.append(expansion)
+    if expansions:
+        return query + " " + " ".join(expansions)
+    return query
+
+
 def search_verses(query: str, top_k: int = 10) -> list[dict]:
     """Keyword search over verses. Returns top_k verse IDs with scores."""
     _build_index()
     verses = _load_verses()
 
-    tokens = _tokenize(query)
+    tokens = _tokenize(_expand_query(query))
     if not tokens:
         return []
 

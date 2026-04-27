@@ -222,7 +222,7 @@ export default function ChatPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <div className="max-w-2xl mx-auto">
-          {messages.map((msg) => (
+          {messages.map((msg, idx) => (
             <MessageBubble
               key={msg.id}
               role={msg.role}
@@ -231,6 +231,8 @@ export default function ChatPage() {
               messageId={msg.messageId}
               userId={userId!}
               riskLevel={msg.riskLevel}
+              isLatest={idx === messages.length - 1}
+              onFollowUp={(text) => { if (!loading) handleSend(text); }}
             />
           ))}
 

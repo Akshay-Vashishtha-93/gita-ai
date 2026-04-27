@@ -4,6 +4,7 @@ GitaAI Backend — FastAPI Application
 import os
 import uuid
 import json
+import datetime
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -179,11 +180,20 @@ async def chat(msg: ChatMessage):
 
     # Load recent conversation history for context
     history_cursor = await db.execute(
-        "SELECT role, content FROM messages WHERE session_id = ? ORDER BY created_at ASC",
+        "SELECT role, content, verse_ids FROM messages WHERE session_id = ? ORDER BY created_at ASC",
         (session_id,),
     )
     history_rows = await history_cursor.fetchall()
     history = [{"role": r["role"], "content": r["content"]} for r in history_rows]
+
+    # Collect verse_ids already shown in this session to avoid repetition
+    seen_verse_ids: list[str] = []
+    for r in history_rows:
+        if r["role"] == "assistant" and r["verse_ids"]:
+            try:
+                seen_verse_ids.extend(json.loads(r["verse_ids"]))
+            except Exception:
+                pass
 
     # Save user message
     user_msg_id = str(uuid.uuid4())
@@ -192,8 +202,8 @@ async def chat(msg: ChatMessage):
         (user_msg_id, session_id, msg.message),
     )
 
-    # Process through agent pipeline (with history for context)
-    result = process_query(msg.message, user_profile, history)
+    # Process through agent pipeline (with history + seen verses for context)
+    result = process_query(msg.message, user_profile, history, seen_verse_ids=seen_verse_ids)
 
     # Save assistant response
     assistant_msg_id = str(uuid.uuid4())
@@ -412,6 +422,67 @@ Write the interpretation for this specific life stage."""
         result["interpretation"] = f"This verse from Chapter {verse['chapter']} speaks to the {stage['name']} stage with particular resonance. {verse.get('translation_en', '')}"
 
     _interp_cache[cache_key] = result
+    return result
+
+
+# ─── Daily Verse ───
+
+_daily_cache: dict = {}
+
+@app.get("/api/daily-verse")
+async def daily_verse(user_id: Optional[str] = None):
+    from services.embedding import _load_verses
+    verses = _load_verses()
+
+    # Deterministic verse selection: rotate through all 700 by day of year
+    day_of_year = datetime.datetime.utcnow().timetuple().tm_yday
+    verse = verses[day_of_year % len(verses)]
+    verse_id = verse["id"]
+
+    # Get user's life stage for personalised interpretation
+    life_stage_id = None
+    if user_id:
+        try:
+            db = await get_db()
+            cursor = await db.execute("SELECT life_stage_id FROM users WHERE id = ?", (user_id,))
+            row = await cursor.fetchone()
+            await db.close()
+            if row:
+                life_stage_id = row["life_stage_id"]
+        except Exception:
+            pass
+
+    stages = get_life_stages()
+    stage = next((s for s in stages if s["id"] == life_stage_id), stages[2])
+
+    cache_key = f"daily:{verse_id}:{stage['id']}"
+    if cache_key in _daily_cache:
+        return _daily_cache[cache_key]
+
+    interpretation = None
+    if llm_client:
+        try:
+            prompt = f"""Verse: Chapter {verse['chapter']}, Verse {verse['verse']}
+Translation: {verse.get('translation_en', '')}
+Life Stage: {stage['name']} (ages {stage['age_lower']}-{stage['age_upper']})
+
+Write a short, vivid daily reflection (80-100 words) for someone at this life stage. Make it feel like a morning insight — grounding, warm, and actionable. No headers."""
+            resp = llm_client.messages.create(
+                model=LLM_MODEL, max_tokens=200,
+                system="You are a Gita daily wisdom guide. Write short, warm daily reflections.",
+                messages=[{"role": "user", "content": prompt}],
+            )
+            interpretation = resp.content[0].text
+        except Exception as e:
+            print(f"Daily verse LLM error: {e}")
+
+    result = {
+        "verse": verse,
+        "life_stage": stage,
+        "interpretation": interpretation or verse.get("translation_en", ""),
+        "date": datetime.datetime.utcnow().strftime("%B %d, %Y"),
+    }
+    _daily_cache[cache_key] = result
     return result
 
 

@@ -176,8 +176,15 @@ For life_problem or philosophical:
   },
   "insight": "2-3 sentences: what this verse specifically means for THIS person's situation. Name their actual problem. Be direct.",
   "action": "One very specific, concrete action they can take in the next 24 hours. Not 'reflect on your dharma' but 'Write down 3 reasons you chose [their specific thing]'",
-  "reflection": "One genuine question that will make them think differently. Not rhetorical."
+  "reflection": "One genuine question that will make them think differently. Not rhetorical.",
+  "follow_ups": ["Short follow-up question 1?", "Short follow-up question 2?", "Short follow-up question 3?"]
 }
+
+follow_ups rules:
+- 3 natural questions the user might want to ask next, specific to THEIR situation
+- Keep them short (6-10 words each)
+- NOT generic ("Tell me more") — make them contextual e.g. "How do I practice this at work?", "What does Krishna say about anger towards parents?"
+- Write them as if the user is asking, in first person or second person
 
 For greeting/casual:
 {
@@ -250,7 +257,6 @@ RESPOND IN LANGUAGE: {language}
 
 USER:
 - Age: {user_profile.get('age')}, Life Stage: {life_stage.get('name', '')}
-- Pressures: {', '.join(life_stage.get('india_pressures', [])[:3])}
 - Gita familiarity: {user_profile.get('gita_familiarity', 'NEVER_READ')}
 - Resonant Gita concepts: {', '.join(life_stage.get('resonant_concepts', []))}
 - Tone: {life_stage.get('tone', 'warm')} | Avoid: {', '.join(life_stage.get('avoid', []))}
@@ -260,6 +266,10 @@ DEPTH ANALYSIS (from internal agent debate):
 - What they need: {depth.get('what_they_need', '')}
 - Recommended tone: {depth.get('tone', 'warm_friend')}
 - What NOT to say: {depth.get('wrong_approach', '')}
+
+LIFE STAGE CONTEXT:
+- Primary concerns: {', '.join(life_stage.get('primary_concerns', []))}
+- India pressures: {', '.join(life_stage.get('india_pressures', [])[:3])}
 
 DETECTED: problems={routed.get('problems', [])}, emotions={routed.get('emotions', [])}, intensity={routed.get('emotional_intensity', 0.5)}
 {verse_block}
@@ -293,9 +303,11 @@ USER'S MESSAGE:
 
 # ─── MAIN PIPELINE ───
 
-def process_query(query: str, user_profile: dict, history: list[dict] = None) -> dict:
+def process_query(query: str, user_profile: dict, history: list[dict] = None, seen_verse_ids: list[str] = None) -> dict:
     if history is None:
         history = []
+    if seen_verse_ids is None:
+        seen_verse_ids = []
 
     # Step 1: Safety
     safety = assess_risk(query)
@@ -351,6 +363,14 @@ def process_query(query: str, user_profile: dict, history: list[dict] = None) ->
                 if chap in resonant_chapters:
                     v["similarity"] *= 1.3  # 30% relevance boost
             top_verses.sort(key=lambda x: x["similarity"], reverse=True)
+
+        # Filter out verses already shown in this session to avoid repetition
+        if seen_verse_ids:
+            seen_set = set(seen_verse_ids)
+            fresh = [v for v in top_verses if v["verse_id"] not in seen_set]
+            # Only filter if we have enough fresh candidates; otherwise keep all
+            if len(fresh) >= 3:
+                top_verses = fresh
 
         # Step 7: Depth analysis — debates which verse is best + understands person deeply
         depth = depth_analysis(query, user_profile, life_stage, routed, top_verses)

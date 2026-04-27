@@ -1,6 +1,6 @@
 "use client";
 
-import { ThumbsUp, ThumbsDown, Footprints, Lightbulb, HelpCircle, AlertTriangle } from "lucide-react";
+import { ThumbsUp, ThumbsDown, Footprints, Lightbulb, HelpCircle, AlertTriangle, Copy, Check } from "lucide-react";
 import { submitFeedback } from "@/lib/api";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
@@ -23,6 +23,7 @@ interface Structured {
   insight?: string;
   action?: string;
   reflection?: string;
+  follow_ups?: string[];
   safety_note?: string;
   // simple response fields
   response?: string;
@@ -35,6 +36,8 @@ interface MessageBubbleProps {
   messageId?: string;
   userId?: string;
   riskLevel?: string;
+  onFollowUp?: (text: string) => void;
+  isLatest?: boolean;
 }
 
 function KurukshetraScene() {
@@ -101,6 +104,16 @@ function KurukshetraScene() {
 
 function VerseCard({ verse }: { verse: Verse }) {
   const [showHindi, setShowHindi] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  function copyVerse() {
+    const text = `${verse.transliteration}\n\n"${verse.translation}"\n— ${verse.reference}`;
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <div className="relative rounded-2xl overflow-hidden my-3 shadow-lg">
       {/* Sacred background */}
@@ -139,21 +152,30 @@ function VerseCard({ verse }: { verse: Verse }) {
           {showHindi && verse.translation_hi ? verse.translation_hi : verse.translation}
         </p>
 
-        {/* Toggle Hindi */}
-        {verse.translation_hi && (
-          <button
-            onClick={() => setShowHindi(!showHindi)}
-            className="mt-3 text-xs text-amber-500/70 hover:text-amber-400 transition-colors cursor-pointer"
-          >
-            {showHindi ? "English ↗" : "हिंदी में देखें ↗"}
+        {/* Footer row: Hindi toggle + copy */}
+        <div className="flex items-center justify-between mt-3">
+          {verse.translation_hi ? (
+            <button onClick={() => setShowHindi(!showHindi)}
+              className="text-xs text-amber-500/70 hover:text-amber-400 transition-colors cursor-pointer">
+              {showHindi ? "English ↗" : "हिंदी में देखें ↗"}
+            </button>
+          ) : <span />}
+          <button onClick={copyVerse}
+            className="flex items-center gap-1 text-xs text-amber-600/50 hover:text-amber-400 transition-colors cursor-pointer">
+            {copied ? <><Check className="w-3 h-3" /> Copied</> : <><Copy className="w-3 h-3" /> Copy</>}
           </button>
-        )}
+        </div>
       </div>
     </div>
   );
 }
 
-function GuidanceCard({ structured, content }: { structured: Structured; content: string }) {
+function GuidanceCard({ structured, content, onFollowUp, showFollowUps }: {
+  structured: Structured;
+  content: string;
+  onFollowUp?: (text: string) => void;
+  showFollowUps?: boolean;
+}) {
   if (!structured.empathy && !structured.verse && !structured.insight) {
     // Fallback: just render the plain text
     return (
@@ -221,11 +243,26 @@ function GuidanceCard({ structured, content }: { structured: Structured; content
           <p className="text-xs text-red-700 leading-relaxed">{structured.safety_note}</p>
         </div>
       )}
+
+      {/* Follow-up suggestions — only on latest message */}
+      {showFollowUps && onFollowUp && structured.follow_ups && structured.follow_ups.length > 0 && (
+        <div className="mt-4 pt-3 border-t border-amber-50">
+          <p className="text-xs text-text-secondary/60 mb-2">Continue exploring</p>
+          <div className="flex flex-wrap gap-2">
+            {structured.follow_ups.map((q, i) => (
+              <button key={i} onClick={() => onFollowUp(q)}
+                className="text-xs px-3 py-1.5 rounded-full border border-amber-200 bg-amber-50/60 text-amber-800 hover:bg-amber-100 hover:border-amber-300 transition-colors cursor-pointer text-left">
+                {q}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-export default function MessageBubble({ role, content, structured, messageId, userId }: MessageBubbleProps) {
+export default function MessageBubble({ role, content, structured, messageId, userId, onFollowUp, isLatest }: MessageBubbleProps) {
   const [feedback, setFeedback] = useState<string | null>(null);
   const isUser = role === "user";
 
@@ -265,7 +302,7 @@ export default function MessageBubble({ role, content, structured, messageId, us
         <div className="bg-white rounded-2xl rounded-tl-sm border border-amber-100 shadow-sm overflow-hidden">
           <div className="px-4 pt-4 pb-3">
             {isGuidance && structured ? (
-              <GuidanceCard structured={structured} content={content} />
+              <GuidanceCard structured={structured} content={content} onFollowUp={onFollowUp} showFollowUps={isLatest} />
             ) : (
               <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed">
                 <ReactMarkdown>{simpleText}</ReactMarkdown>

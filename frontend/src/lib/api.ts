@@ -123,6 +123,18 @@ export async function getVerseInterpretation(
   return request(`/api/learn/verses/${verseId}/interpret${qs}`);
 }
 
+export interface DailyVerse {
+  verse: Record<string, unknown>;
+  life_stage: LifeStage;
+  interpretation: string;
+  date: string;
+}
+
+export async function getDailyVerse(userId?: string): Promise<DailyVerse> {
+  const qs = userId ? `?user_id=${userId}` : "";
+  return request(`/api/daily-verse${qs}`);
+}
+
 export async function submitFeedback(data: {
   user_id: string;
   message_id?: string;

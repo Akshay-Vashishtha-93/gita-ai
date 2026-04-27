@@ -35,6 +35,7 @@ export default function LearnPage() {
   const [overall, setOverall] = useState({ read: 0, total: TOTAL_VERSES, pct: 0 });
 
   useEffect(() => {
+    if (!localStorage.getItem("gitaai_user_id")) { router.push("/onboarding"); return; }
     getChapters().then((chs) => {
       setChapters(chs);
       const prog: Record<number, { read: number; total: number; pct: number }> = {};

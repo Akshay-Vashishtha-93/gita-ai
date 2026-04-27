@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { MessageCircle, BookOpen, History, ChevronRight, Star } from "lucide-react";
+import { MessageCircle, BookOpen, History, ChevronRight, User } from "lucide-react";
 import { getOverallProgress, TOTAL_VERSES } from "@/lib/progress";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
@@ -81,10 +81,16 @@ export default function HomePage() {
             <BookOpen className="w-4 h-4" /> Learn
           </button>
           {hasUser && (
-            <button onClick={() => router.push("/history")}
-              className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-maroon px-3 py-1.5 rounded-lg hover:bg-white/60 transition-all cursor-pointer">
-              <History className="w-4 h-4" /> History
-            </button>
+            <>
+              <button onClick={() => router.push("/history")}
+                className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-maroon px-3 py-1.5 rounded-lg hover:bg-white/60 transition-all cursor-pointer">
+                <History className="w-4 h-4" /> History
+              </button>
+              <button onClick={() => router.push("/profile")}
+                className="flex items-center gap-1.5 text-sm text-text-secondary hover:text-maroon px-3 py-1.5 rounded-lg hover:bg-white/60 transition-all cursor-pointer">
+                <User className="w-4 h-4" /> Profile
+              </button>
+            </>
           )}
           <button onClick={startNewChat}
             className="flex items-center gap-1.5 text-sm bg-maroon hover:bg-maroon-light text-white px-4 py-1.5 rounded-lg transition-colors cursor-pointer ml-1">

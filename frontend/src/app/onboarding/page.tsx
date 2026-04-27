@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createUser, loginUser } from "@/lib/api";
-import { ArrowRight, Loader2, BookOpen } from "lucide-react";
+import { ArrowRight, Loader2 } from "lucide-react";
 
 const FAMILIARITY_OPTIONS = [
   { value: "NEVER_READ", label: "Never read it" },
@@ -13,28 +13,17 @@ const FAMILIARITY_OPTIONS = [
   { value: "STUDY_REGULARLY", label: "Study it regularly" },
 ];
 
-const LANGUAGE_OPTIONS = [
-  { value: "en", label: "English" },
-  { value: "hi", label: "Hindi" },
-  { value: "hinglish", label: "Hinglish" },
-];
-
 export default function OnboardingPage() {
   const router = useRouter();
   const [mode, setMode] = useState<"choose" | "new" | "login">("choose");
-  const [step, setStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // New user fields
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
-  const [language, setLanguage] = useState("en");
   const [familiarity, setFamiliarity] = useState("NEVER_READ");
-
-  // Login
   const [loginEmail, setLoginEmail] = useState("");
 
   async function handleLogin() {
@@ -45,9 +34,8 @@ export default function OnboardingPage() {
       localStorage.setItem("gitaai_user_id", result.user_id);
       localStorage.removeItem("gitaai_session_id");
       router.push("/");
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
-      setError(msg.includes("not_found") ? "No account found with this email." : "Something went wrong.");
+    } catch {
+      setError("No account found with this email.");
     } finally {
       setLoading(false);
     }
@@ -63,7 +51,6 @@ export default function OnboardingPage() {
         display_name: name || undefined,
         age: ageNum,
         gender: gender || undefined,
-        preferred_language: language,
         gita_familiarity: familiarity,
       });
       localStorage.setItem("gitaai_user_id", result.user_id);
@@ -71,40 +58,27 @@ export default function OnboardingPage() {
       router.push("/chat");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("email_exists")) {
-        setError("This email is already registered. Use 'Continue your journey' to log in.");
-      } else {
-        setError(msg || "Something went wrong");
-      }
+      setError(msg.includes("email_exists") ? "This email is already registered. Use 'Continue your journey' to log in." : "Something went wrong");
     } finally {
       setLoading(false);
     }
   }
 
-  // ── Choose screen ──
   if (mode === "choose") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-sacred">
-        <div className="w-full max-w-sm text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-amber-500 to-orange-700 flex items-center justify-center text-white text-3xl mx-auto shadow-lg">
-            ॐ
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold text-maroon">GitaAI</h1>
-            <p className="text-sm text-text-secondary mt-1">Ancient wisdom for modern life</p>
-          </div>
-          <div className="space-y-3 pt-2">
-            <button
-              onClick={() => setMode("new")}
-              className="w-full flex items-center justify-center gap-2 bg-maroon hover:bg-maroon-light text-white font-medium px-6 py-3 rounded-xl transition-colors cursor-pointer"
-            >
+      <div className="min-h-screen flex items-center justify-center px-4 bg-sacred">
+        <div className="w-full max-w-sm text-center">
+          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-amber-500 to-orange-800 flex items-center justify-center text-white text-4xl mx-auto mb-6 shadow-xl" style={{ fontFamily: "serif" }}>ॐ</div>
+          <h1 className="text-3xl font-bold text-maroon mb-2">GitaAI</h1>
+          <p className="text-text-secondary text-sm mb-10">Ancient wisdom for your modern life</p>
+          <div className="space-y-3">
+            <button onClick={() => setMode("new")}
+              className="w-full flex items-center justify-center gap-2 bg-maroon hover:bg-maroon-light text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg transition-all cursor-pointer">
               Begin your journey <ArrowRight className="w-4 h-4" />
             </button>
-            <button
-              onClick={() => setMode("login")}
-              className="w-full flex items-center justify-center gap-2 border border-gold/40 hover:border-saffron/60 text-maroon font-medium px-6 py-3 rounded-xl transition-colors cursor-pointer"
-            >
-              <BookOpen className="w-4 h-4" /> Continue your journey
+            <button onClick={() => setMode("login")}
+              className="w-full border border-gold/40 hover:border-saffron/60 text-maroon font-medium px-6 py-3.5 rounded-xl transition-colors cursor-pointer">
+              Continue your journey
             </button>
           </div>
         </div>
@@ -112,28 +86,20 @@ export default function OnboardingPage() {
     );
   }
 
-  // ── Login screen ──
   if (mode === "login") {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-sacred">
+      <div className="min-h-screen flex items-center justify-center px-4 bg-sacred">
         <div className="w-full max-w-sm">
           <button onClick={() => { setMode("choose"); setError(""); }} className="text-sm text-text-secondary hover:text-maroon mb-6 block">← Back</button>
           <h2 className="text-2xl font-bold text-maroon mb-1">Welcome back</h2>
-          <p className="text-sm text-text-secondary mb-6">Enter the email you registered with</p>
-          <input
-            type="email"
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
+          <p className="text-sm text-text-secondary mb-6">Enter the email you signed up with</p>
+          <input type="email" value={loginEmail} onChange={(e) => setLoginEmail(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleLogin()}
             placeholder="your@email.com"
-            className="w-full px-4 py-2.5 rounded-lg border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40 mb-4"
-          />
+            className="w-full px-4 py-3 rounded-xl border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40 mb-4" />
           {error && <p className="text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg mb-4">{error}</p>}
-          <button
-            onClick={handleLogin}
-            disabled={loading}
-            className="w-full flex items-center justify-center gap-2 bg-maroon hover:bg-maroon-light text-white font-medium px-6 py-3 rounded-xl transition-colors disabled:opacity-50 cursor-pointer"
-          >
+          <button onClick={handleLogin} disabled={loading}
+            className="w-full flex items-center justify-center gap-2 bg-maroon text-white font-medium px-6 py-3 rounded-xl transition-colors disabled:opacity-50 cursor-pointer">
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Continue →"}
           </button>
         </div>
@@ -141,110 +107,59 @@ export default function OnboardingPage() {
     );
   }
 
-  // ── New user steps ──
-  const steps = [
-    <div key="basics" className="space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold text-maroon">Begin your journey</h2>
-        <p className="text-sm text-text-secondary mt-1">Tell us about yourself for personalised guidance</p>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5">Email <span className="text-text-secondary">(optional — to save progress)</span></label>
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-          placeholder="your@email.com"
-          className="w-full px-4 py-2.5 rounded-lg border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5">Name <span className="text-text-secondary">(optional)</span></label>
-        <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-          placeholder="What should we call you?"
-          className="w-full px-4 py-2.5 rounded-lg border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5">Age <span className="text-maroon">*</span></label>
-        <input type="number" value={age} onChange={(e) => setAge(e.target.value)}
-          placeholder="Your age" min={10} max={100}
-          className="w-full px-4 py-2.5 rounded-lg border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-1.5">Gender <span className="text-text-secondary">(optional)</span></label>
-        <div className="flex gap-3">
-          {["Male", "Female", "Other"].map((g) => (
-            <button key={g} onClick={() => setGender(g.toLowerCase())}
-              className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer text-sm ${gender === g.toLowerCase() ? "border-saffron bg-saffron/10 text-saffron-dark" : "border-gold/30 hover:border-saffron/50"}`}>
-              {g}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>,
-
-    <div key="prefs" className="space-y-5">
-      <div>
-        <h2 className="text-2xl font-bold text-maroon">Your preferences</h2>
-        <p className="text-sm text-text-secondary mt-1">We'll personalise the Gita's wisdom for you</p>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2">Preferred language</label>
-        <div className="flex gap-3">
-          {LANGUAGE_OPTIONS.map((opt) => (
-            <button key={opt.value} onClick={() => setLanguage(opt.value)}
-              className={`px-4 py-2 rounded-lg border transition-colors cursor-pointer text-sm ${language === opt.value ? "border-saffron bg-saffron/10 text-saffron-dark" : "border-gold/30 hover:border-saffron/50"}`}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <label className="block text-sm font-medium mb-2">How familiar are you with the Bhagavad Gita?</label>
-        <div className="space-y-2">
-          {FAMILIARITY_OPTIONS.map((opt) => (
-            <button key={opt.value} onClick={() => setFamiliarity(opt.value)}
-              className={`w-full text-left px-4 py-3 rounded-lg border transition-colors cursor-pointer text-sm ${familiarity === opt.value ? "border-saffron bg-saffron/10 text-saffron-dark" : "border-gold/30 hover:border-saffron/50"}`}>
-              {opt.label}
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>,
-  ];
-
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-sacred">
       <div className="w-full max-w-md">
-        <button onClick={() => { setMode("choose"); setStep(0); setError(""); }} className="text-sm text-text-secondary hover:text-maroon mb-6 block">← Back</button>
-        <div className="flex gap-2 mb-8">
-          {steps.map((_, i) => (
-            <div key={i} className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-saffron" : "bg-gold/20"}`} />
-          ))}
-        </div>
+        <button onClick={() => { setMode("choose"); setError(""); }} className="text-sm text-text-secondary hover:text-maroon mb-6 block">← Back</button>
+        <h2 className="text-2xl font-bold text-maroon mb-1">Tell us about yourself</h2>
+        <p className="text-sm text-text-secondary mb-7">This personalises the Gita's guidance for your life stage</p>
 
-        {steps[step]}
+        <div className="space-y-5">
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Email <span className="text-text-secondary font-normal">(optional — saves your progress across devices)</span></label>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="your@email.com"
+              className="w-full px-4 py-2.5 rounded-xl border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Name <span className="text-text-secondary font-normal">(optional)</span></label>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="What should we call you?"
+              className="w-full px-4 py-2.5 rounded-xl border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1.5">Age <span className="text-maroon">*</span></label>
+            <input type="number" value={age} onChange={(e) => setAge(e.target.value)} placeholder="Your age" min={10} max={100}
+              className="w-full px-4 py-2.5 rounded-xl border border-gold/30 bg-white focus:outline-none focus:ring-2 focus:ring-saffron/40" />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Gender <span className="text-text-secondary font-normal">(optional)</span></label>
+            <div className="flex gap-2">
+              {["Male", "Female", "Other"].map((g) => (
+                <button key={g} onClick={() => setGender(g.toLowerCase())}
+                  className={`flex-1 py-2 rounded-lg border text-sm transition-colors cursor-pointer ${gender === g.toLowerCase() ? "border-saffron bg-saffron/10 text-saffron-dark" : "border-gold/30 hover:border-saffron/50"}`}>
+                  {g}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">How familiar are you with the Bhagavad Gita?</label>
+            <div className="space-y-2">
+              {FAMILIARITY_OPTIONS.map((opt) => (
+                <button key={opt.value} onClick={() => setFamiliarity(opt.value)}
+                  className={`w-full text-left px-4 py-2.5 rounded-lg border text-sm transition-colors cursor-pointer ${familiarity === opt.value ? "border-saffron bg-saffron/10 text-saffron-dark" : "border-gold/30 hover:border-saffron/50"}`}>
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
 
         {error && <p className="mt-4 text-sm text-red-600 bg-red-50 px-3 py-2 rounded-lg">{error}</p>}
 
-        <div className="flex justify-between mt-8">
-          {step > 0 ? (
-            <button onClick={() => setStep(step - 1)} className="text-text-secondary hover:text-maroon transition-colors cursor-pointer text-sm">Back</button>
-          ) : <div />}
-
-          {step < steps.length - 1 ? (
-            <button
-              onClick={() => {
-                if (!age || parseInt(age) < 10 || parseInt(age) > 100) { setError("Please enter a valid age (10–100)"); return; }
-                setError(""); setStep(step + 1);
-              }}
-              className="flex items-center gap-2 bg-saffron hover:bg-saffron-dark text-white font-medium px-6 py-2.5 rounded-lg transition-colors cursor-pointer"
-            >
-              Next <ArrowRight className="w-4 h-4" />
-            </button>
-          ) : (
-            <button onClick={handleSubmit} disabled={loading}
-              className="flex items-center gap-2 bg-maroon hover:bg-maroon-light text-white font-medium px-6 py-2.5 rounded-lg transition-colors disabled:opacity-50 cursor-pointer">
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : "Start Seeking Wisdom"}
-            </button>
-          )}
-        </div>
+        <button onClick={handleSubmit} disabled={loading}
+          className="w-full mt-8 flex items-center justify-center gap-2 bg-maroon hover:bg-maroon-light text-white font-semibold px-6 py-3.5 rounded-xl shadow-lg transition-colors disabled:opacity-50 cursor-pointer">
+          {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>Start Seeking Wisdom <ArrowRight className="w-4 h-4" /></>}
+        </button>
       </div>
     </div>
   );

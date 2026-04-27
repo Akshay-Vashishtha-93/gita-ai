@@ -58,8 +58,6 @@ class UserCreate(BaseModel):
     display_name: Optional[str] = None
     age: int = Field(ge=10, le=100)
     gender: Optional[str] = None
-    location: Optional[str] = None
-    preferred_language: str = "en"
     gita_familiarity: str = "NEVER_READ"
 
 
@@ -102,12 +100,10 @@ async def create_user(user: UserCreate):
             raise HTTPException(status_code=409, detail="email_exists")
 
     await db.execute(
-        """INSERT INTO users (id, email, display_name, age, gender, location, preferred_language,
-           life_stage_id, gita_familiarity, onboarding_complete)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)""",
-        (user_id, user.email, user.display_name, user.age, user.gender, user.location,
-         user.preferred_language, life_stage["id"] if life_stage else None,
-         user.gita_familiarity),
+        """INSERT INTO users (id, email, display_name, age, gender, life_stage_id, gita_familiarity, onboarding_complete)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 1)""",
+        (user_id, user.email, user.display_name, user.age, user.gender,
+         life_stage["id"] if life_stage else None, user.gita_familiarity),
     )
     await db.commit()
     await db.close()
@@ -220,6 +216,7 @@ async def chat(msg: ChatMessage):
 
     return {
         "response": result["response"],
+        "structured": result.get("structured"),
         "session_id": session_id,
         "message_id": assistant_msg_id,
         "verse_ids": result.get("verse_ids", []),

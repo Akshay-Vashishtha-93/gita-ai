@@ -13,6 +13,7 @@ interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  structured?: Record<string, unknown>;
   messageId?: string;
   riskLevel?: string;
 }
@@ -135,6 +136,7 @@ export default function ChatPage() {
           id: `assistant-${Date.now()}`,
           role: "assistant",
           content: result.response,
+          structured: result.structured,
           messageId: result.message_id,
           riskLevel: result.risk_level,
         },
@@ -225,6 +227,7 @@ export default function ChatPage() {
               key={msg.id}
               role={msg.role}
               content={msg.content}
+              structured={msg.structured as never}
               messageId={msg.messageId}
               userId={userId!}
               riskLevel={msg.riskLevel}

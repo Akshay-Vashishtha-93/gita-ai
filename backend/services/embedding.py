@@ -164,3 +164,7 @@ def get_verse_by_id(verse_id: str) -> Optional[dict]:
 def get_verses_by_chapter(chapter: int) -> list[dict]:
     verses = _load_verses()
     return [v for v in verses if v["chapter"] == chapter]
+
+
+def get_all_verses() -> list[dict]:
+    return _load_verses()

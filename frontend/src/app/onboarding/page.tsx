@@ -58,7 +58,13 @@ export default function OnboardingPage() {
       router.push("/chat");
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
-      setError(msg.includes("email_exists") ? "This email is already registered. Use 'Continue your journey' to log in." : "Something went wrong");
+      if (msg.includes("email_exists")) {
+        setError("This email is already registered. Use 'Continue your journey' to log in.");
+      } else if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("fetch")) {
+        setError("Cannot reach the server. Please try again in a moment.");
+      } else {
+        setError(msg || "Something went wrong. Please try again.");
+      }
     } finally {
       setLoading(false);
     }

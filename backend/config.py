@@ -11,7 +11,8 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 # Paths
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / "data"
-DB_PATH = BASE_DIR / "db" / "gita.db"
+# DB_PATH: override with env var so Railway volumes work (/data/gita.db)
+DB_PATH = Path(os.getenv("DB_PATH", str(BASE_DIR / "db" / "gita.db")))
 
 # App
 APP_ENV = os.getenv("APP_ENV", "development")

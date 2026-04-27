@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 from db.database import init_db, get_db
-from services.embedding import search_verses, get_verse_by_id, get_verses_by_chapter
+from services.embedding import search_verses, get_verse_by_id, get_verses_by_chapter, get_all_verses
 from services.knowledge_graph import get_problems, get_emotions, get_life_stages, get_life_stage_for_age
 from agents.pipeline import process_query, client as llm_client
 from config import LLM_MODEL, MAX_TOKENS
@@ -431,8 +431,7 @@ _daily_cache: dict = {}
 
 @app.get("/api/daily-verse")
 async def daily_verse(user_id: Optional[str] = None):
-    from services.embedding import _load_verses
-    verses = _load_verses()
+    verses = get_all_verses()
 
     # Deterministic verse selection: rotate through all 700 by day of year
     day_of_year = datetime.datetime.utcnow().timetuple().tm_yday

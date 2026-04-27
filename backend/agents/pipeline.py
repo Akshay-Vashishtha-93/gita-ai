@@ -204,7 +204,8 @@ QUALITY RULES:
 - empathy must reference something specific from their message (not "I understand you're going through a tough time")
 - action must be specific enough that they know exactly what to do (includes WHAT, not just why)
 - Do NOT start with "As per the Bhagavad Gita" or "Great question"
-- The verse translation should read naturally, not like a textbook"""
+- The verse translation should read naturally, not like a textbook
+- If word-by-word meanings are provided, use them to anchor your insight — explain 1-2 key Sanskrit words (e.g. "Karma literally means action, not fate") to make the verse feel alive and specific, not generic"""
 
 
 def synthesize_structured(
@@ -235,6 +236,8 @@ Commentaries (excerpts):"""
             if i >= 2:
                 break
             verse_block += f"\n- {name}: {str(text)[:250]}"
+        if best_verse.get("word_meanings"):
+            verse_block += f"\nWord-by-word meanings: {str(best_verse['word_meanings'])[:500]}"
 
     history_block = ""
     if history:
@@ -339,6 +342,15 @@ def process_query(query: str, user_profile: dict, history: list[dict] = None) ->
     if classification.get("needs_verse", True):
         enhanced = f"{query} {routed.get('summary', '')}"
         top_verses = search_verses(enhanced, top_k=8)
+
+        # Boost verses from life-stage resonant chapters
+        resonant_chapters = set(life_stage.get("resonant_chapters", []))
+        if resonant_chapters:
+            for v in top_verses:
+                chap = int(v["verse_id"].split("-")[0]) if "-" in v["verse_id"] else 0
+                if chap in resonant_chapters:
+                    v["similarity"] *= 1.3  # 30% relevance boost
+            top_verses.sort(key=lambda x: x["similarity"], reverse=True)
 
         # Step 7: Depth analysis — debates which verse is best + understands person deeply
         depth = depth_analysis(query, user_profile, life_stage, routed, top_verses)
